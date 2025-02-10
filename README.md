@@ -21,6 +21,24 @@ go get github.com/rescoot/go-mmcli
 - Check IPv6 support
 - Access complete port mapping
 
+## Finding Modems
+
+The library provides several ways to find modems:
+
+```go
+// Get all modem IDs
+ids, err := mmcli.GetModemIDs()
+
+// Get full DBus paths
+paths, err := mmcli.ListModems()
+
+// Get just the first modem ID (common case)
+id, err := mmcli.GetFirstModemID()
+
+// Get details for a specific modem
+modem, err := mmcli.GetModemDetails(id)
+```
+
 ## Usage
 
 ### Basic Example
@@ -31,120 +49,32 @@ package main
 import (
     "fmt"
     "log"
-    "os/exec"
     
     "github.com/rescoot/go-mmcli"
 )
 
 func main() {
-    // Get JSON output from mmcli
-    cmd := exec.Command("mmcli", "-m", "0", "-J")
-    output, err := cmd.Output()
+    // List available modems
+    ids, err := mmcli.GetModemIDs()
     if err != nil {
-        log.Fatal("Failed to run mmcli:", err)
+        log.Fatal(err)
     }
+    fmt.Printf("Found %d modems: %v\n", len(ids), ids)
     
-    // Parse the output
-    mm, err := mmcli.Parse(output)
-    if err != nil {
-        log.Fatal("Failed to parse mmcli output:", err)
-    }
-    
-    // Check connection status
-    if mm.IsConnected() {
-        fmt.Println("Modem is connected!")
-        
-        // Get signal strength
-        strength, err := mm.SignalStrength()
-        if err == nil {
-            fmt.Printf("Signal strength: %d%%\n", strength)
-        }
-        
-        // Get operator info
-        name, code := mm.GetOperatorInfo()
-        fmt.Printf("Connected to: %s (Code: %s)\n", name, code)
-        
-        // Get network technology
-        tech := mm.GetCurrentAccessTechnology()
-        fmt.Printf("Using %s technology\n", tech)
-    } else {
-        fmt.Println("Modem is not connected")
-    }
-}
-```
-
-### Working with Ports
-
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    
-    "github.com/rescoot/go-mmcli"
-)
-
-func main() {
-    // Parse mmcli output...
-    mm, err := mmcli.Parse(output)
+    // Get details for first modem
+    modem, err := mmcli.GetModemDetails(ids[0])
     if err != nil {
         log.Fatal(err)
     }
     
-    // Get all ports
-    ports := mm.GetAllPorts()
-    fmt.Println("Available ports:")
-    for portType, portName := range ports {
-        fmt.Printf("- %s: %s\n", portType, portName)
-    }
-    
-    // Get specific port types
-    if qmiPort := mm.GetPortByType("qmi"); qmiPort != "" {
-        fmt.Printf("QMI port: %s\n", qmiPort)
-    }
-    
-    if atPort := mm.GetPortByType("at"); atPort != "" {
-        fmt.Printf("AT command port: %s\n", atPort)
-    }
-    
-    if netPort := mm.GetPortByType("net"); netPort != "" {
-        fmt.Printf("Network interface: %s\n", netPort)
-    }
-}
-```
-
-### Checking SIM Status
-
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    
-    "github.com/rescoot/go-mmcli"
-)
-
-func main() {
-    // Parse mmcli output...
-    mm, err := mmcli.Parse(output)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    // Check if SIM is locked
-    if mm.IsSimLocked() {
-        fmt.Println("SIM card is locked!")
+    if modem.IsConnected() {
+        strength, _ := modem.SignalStrength()
+        name, code := modem.GetOperatorInfo()
+        tech := modem.GetCurrentAccessTechnology()
         
-        // Check remaining PIN attempts
-        pinRetries := mm.RemainingUnlockRetries("sim-pin")
-        fmt.Printf("Remaining PIN attempts: %d\n", pinRetries)
-        
-        pukRetries := mm.RemainingUnlockRetries("sim-puk")
-        fmt.Printf("Remaining PUK attempts: %d\n", pukRetries)
-    } else {
-        fmt.Println("SIM card is unlocked")
+        fmt.Printf("Connected to %s (%s)\n", name, code)
+        fmt.Printf("Technology: %s\n", tech)
+        fmt.Printf("Signal: %d%%\n", strength)
     }
 }
 ```
@@ -152,6 +82,10 @@ func main() {
 ## Available Methods
 
 - `Parse(data []byte) (*ModemManager, error)` - Parse mmcli JSON output
+- `ListModems() ([]string, error)` - Get full DBus paths of all modems
+- `GetModemIDs() ([]string, error)` - Get IDs of all modems
+- `GetFirstModemID() (string, error)` - Get ID of first available modem
+- `GetModemDetails(id string) (*ModemManager, error)` - Get details for specific modem
 - `IsConnected() bool` - Check if modem is connected
 - `SignalStrength() (int, error)` - Get signal strength percentage
 - `GetPortByType(portType string) string` - Get port name by type
