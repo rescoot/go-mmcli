@@ -1,37 +1,29 @@
+// examples/basic/main.go
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os/exec"
 	"time"
 
 	"github.com/rescoot/go-mmcli"
 )
 
 func main() {
+	// Get first available modem ID
+	id, err := mmcli.GetFirstModemID()
+	if err != nil {
+		log.Fatal("No modem found:", err)
+	}
+
+	fmt.Printf("Monitoring modem %s...\n", id)
+
 	// Simple monitoring loop to demonstrate basic modem information
 	for {
-		// Run mmcli command to get modem information
-		cmd := exec.Command("mmcli", "-m", "0", "-J")
-		output, err := cmd.Output()
+		// Get modem details
+		mm, err := mmcli.GetModemDetails(id)
 		if err != nil {
-			log.Printf("Failed to run mmcli: %v", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		// Parse the output
-		mm, err := mmcli.Parse(output)
-		if err != nil {
-			log.Printf("Failed to parse mmcli output: %v", err)
-			// Pretty print the JSON to help debug parsing issues
-			var prettyJSON map[string]interface{}
-			if err := json.Unmarshal(output, &prettyJSON); err == nil {
-				prettyOutput, _ := json.MarshalIndent(prettyJSON, "", "  ")
-				log.Printf("Raw JSON: %s", string(prettyOutput))
-			}
+			log.Printf("Failed to get modem details: %v", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}

@@ -3,8 +3,17 @@ package mmcli
 import (
 	"encoding/json"
 	"fmt"
+	"os/exec"
 	"strings"
 )
+
+// ModemList represents the top-level structure for mmcli -L output
+type ModemList struct {
+	ModemManager struct {
+		Version string   `json:"version"`
+		Modems  []string `json:"modems"`
+	} `json:"modem-manager"`
+}
 
 // ModemManager represents the top-level structure of mmcli JSON output
 type ModemManager struct {
@@ -98,6 +107,64 @@ type ModemGenericInfo struct {
 type SignalQuality struct {
 	Recent string `json:"recent"`
 	Value  string `json:"value"`
+}
+
+// ListModems returns a list of all available modems with their IDs
+func ListModems() ([]string, error) {
+	out, err := exec.Command("mmcli", "-J", "-L").Output()
+	if err != nil {
+		return nil, fmt.Errorf("mmcli list error: %w", err)
+	}
+
+	var list ModemList
+	if err := json.Unmarshal(out, &list); err != nil {
+		return nil, fmt.Errorf("failed to parse modem list: %w", err)
+	}
+
+	return list.ModemManager.Modems, nil
+}
+
+// GetModemIDs returns a list of numeric modem IDs
+func GetModemIDs() ([]string, error) {
+	modems, err := ListModems()
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, len(modems))
+	for i, path := range modems {
+		parts := strings.Split(path, "/")
+		if len(parts) < 6 {
+			return nil, fmt.Errorf("invalid modem path format: %s", path)
+		}
+		ids[i] = parts[5]
+	}
+
+	return ids, nil
+}
+
+// GetFirstModemID returns the ID of the first available modem
+func GetFirstModemID() (string, error) {
+	ids, err := GetModemIDs()
+	if err != nil {
+		return "", err
+	}
+
+	if len(ids) == 0 {
+		return "", fmt.Errorf("no modem found")
+	}
+
+	return ids[0], nil
+}
+
+// GetModemDetails returns details for a specific modem by ID
+func GetModemDetails(modemID string) (*ModemManager, error) {
+	out, err := exec.Command("mmcli", "-m", modemID, "-J").Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get modem details: %w", err)
+	}
+
+	return Parse(out)
 }
 
 // Parse parses mmcli JSON output into a ModemManager struct

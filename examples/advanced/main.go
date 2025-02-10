@@ -1,10 +1,10 @@
+// examples/advanced/main.go
 package main
 
 import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -75,23 +75,25 @@ func writeModemCapabilities(w *tabwriter.Writer, mm *mmcli.ModemManager) {
 }
 
 func main() {
+	// Get available modems
+	ids, err := mmcli.GetModemIDs()
+	if err != nil {
+		log.Fatal("Failed to get modem IDs:", err)
+	}
+	if len(ids) == 0 {
+		log.Fatal("No modems found")
+	}
+
+	fmt.Printf("Found %d modem(s). Monitoring modem %s...\n", len(ids), ids[0])
+
 	// Create a new tabwriter for formatted output
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 	for {
-		// Run mmcli command with JSON output
-		cmd := exec.Command("mmcli", "-m", "0", "-J")
-		output, err := cmd.Output()
+		// Get modem details
+		mm, err := mmcli.GetModemDetails(ids[0])
 		if err != nil {
-			log.Printf("Failed to run mmcli: %v", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		// Parse the output
-		mm, err := mmcli.Parse(output)
-		if err != nil {
-			log.Printf("Failed to parse mmcli output: %v", err)
+			log.Printf("Failed to get modem details: %v", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}

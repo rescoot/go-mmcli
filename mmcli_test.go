@@ -1,8 +1,74 @@
 package mmcli
 
 import (
+	"encoding/json"
+	"os/exec"
 	"testing"
 )
+
+func TestParseModemList(t *testing.T) {
+	jsonData := []byte(`{
+		"modem-manager": {
+			"version": "1.18.4",
+			"modems": [
+				"/org/freedesktop/ModemManager1/Modem/0",
+				"/org/freedesktop/ModemManager1/Modem/1",
+				"/org/freedesktop/ModemManager1/Modem/2"
+			]
+		}
+	}`)
+
+	var list ModemList
+	err := json.Unmarshal(jsonData, &list)
+	if err != nil {
+		t.Fatalf("Failed to parse modem list JSON: %v", err)
+	}
+
+	if len(list.ModemManager.Modems) != 3 {
+		t.Errorf("Expected 3 modems, got %d", len(list.ModemManager.Modems))
+	}
+
+	if list.ModemManager.Version != "1.18.4" {
+		t.Errorf("Expected version 1.18.4, got %s", list.ModemManager.Version)
+	}
+
+	expectedPaths := []string{
+		"/org/freedesktop/ModemManager1/Modem/0",
+		"/org/freedesktop/ModemManager1/Modem/1",
+		"/org/freedesktop/ModemManager1/Modem/2",
+	}
+
+	for i, path := range list.ModemManager.Modems {
+		if path != expectedPaths[i] {
+			t.Errorf("Expected path %s, got %s", expectedPaths[i], path)
+		}
+	}
+}
+
+func TestGetModemDetails(t *testing.T) {
+	// Skip if we're not in an environment with mmcli available
+	if _, err := exec.LookPath("mmcli"); err != nil {
+		t.Skip("mmcli not available, skipping test")
+	}
+
+	// First get available modems
+	ids, err := GetModemIDs()
+	if err != nil {
+		t.Skip("Could not get modem IDs:", err)
+	}
+	if len(ids) == 0 {
+		t.Skip("No modems available for testing")
+	}
+
+	// Try to get details for the first modem
+	mm, err := GetModemDetails(ids[0])
+	if err != nil {
+		t.Errorf("Failed to get modem details: %v", err)
+	}
+	if mm == nil {
+		t.Error("Expected modem details, got nil")
+	}
+}
 
 func TestParse(t *testing.T) {
 	jsonData := []byte(`{

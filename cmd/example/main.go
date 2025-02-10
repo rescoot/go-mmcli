@@ -1,3 +1,4 @@
+// cmd/example/main.go
 package main
 
 import (
@@ -5,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	modemIndex = flag.String("modem", "0", "Modem index to monitor")
-	interval   = flag.Duration("interval", 5*time.Second, "Update interval")
-	mode       = flag.String("mode", "basic", "Display mode (basic, network, ports, all)")
+	interval = flag.Duration("interval", 5*time.Second, "Update interval")
+	mode     = flag.String("mode", "basic", "Display mode (basic, network, ports, all)")
+	listOnly = flag.Bool("list", false, "List available modems and exit")
+	modemID  = flag.String("modem", "", "Modem ID to monitor (default: first available modem)")
 )
 
 func displayBasicInfo(mm *mmcli.ModemManager) {
@@ -64,20 +65,36 @@ func displayPortInfo(mm *mmcli.ModemManager) {
 func main() {
 	flag.Parse()
 
-	for {
-		// Run mmcli command
-		cmd := exec.Command("mmcli", "-m", *modemIndex, "-J")
-		output, err := cmd.Output()
+	// List modems if requested
+	if *listOnly {
+		paths, err := mmcli.ListModems()
 		if err != nil {
-			log.Printf("Failed to run mmcli: %v", err)
-			time.Sleep(*interval)
-			continue
+			log.Fatal(err)
 		}
+		fmt.Println("Available modems:")
+		for _, path := range paths {
+			fmt.Printf("  %s\n", path)
+		}
+		return
+	}
 
-		// Parse the output
-		mm, err := mmcli.Parse(output)
+	// Get modem ID to monitor
+	id := *modemID
+	if id == "" {
+		var err error
+		id, err = mmcli.GetFirstModemID()
 		if err != nil {
-			log.Printf("Failed to parse mmcli output: %v", err)
+			log.Fatal("No modem found:", err)
+		}
+	}
+
+	fmt.Printf("Monitoring modem %s...\n", id)
+
+	for {
+		// Get modem details
+		mm, err := mmcli.GetModemDetails(id)
+		if err != nil {
+			log.Printf("Failed to get modem details: %v", err)
 			time.Sleep(*interval)
 			continue
 		}
@@ -86,7 +103,8 @@ func main() {
 		fmt.Print("\033[H\033[2J")
 
 		// Display timestamp
-		fmt.Printf("=== Modem Status (Updated: %s) ===\n\n", time.Now().Format("15:04:05"))
+		fmt.Printf("=== Modem %s Status (Updated: %s) ===\n\n",
+			id, time.Now().Format("15:04:05"))
 
 		// Display information based on mode
 		switch strings.ToLower(*mode) {
