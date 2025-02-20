@@ -180,18 +180,21 @@ func ResetModem(modemID string) (bool, error) {
 	return true, nil
 }
 
-func GetSIMInfo(modemID string) (*SIMInfo, error) {
-	out, err := exec.Command("mmcli", "-i", modemID, "-J").Output()
+func GetSIMInfo(simID string) (*SIMInfo, error) {
+	out, err := exec.Command("mmcli", "-i", simID, "-J").Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get SIM info: %w", err)
 	}
 
-	var simInfo SIMInfo
-	if err := json.Unmarshal(out, &simInfo); err != nil {
+	var response struct {
+		SIM SIMInfo `json:"sim"`
+	}
+
+	if err := json.Unmarshal(out, &response); err != nil {
 		return nil, fmt.Errorf("failed to parse SIM info: %w", err)
 	}
 
-	return &simInfo, nil
+	return &response.SIM, nil
 }
 
 // Parse parses mmcli JSON output into a ModemManager struct
