@@ -98,6 +98,21 @@ type SignalQuality struct {
 	Value  string `json:"value"`
 }
 
+type SIMInfo struct {
+	DBusPath   string        `json:"dbus-path"`
+	Properties SIMProperties `json:"properties"`
+}
+
+type SIMProperties struct {
+	Active           string   `json:"active"`
+	EID              string   `json:"eid"`
+	EmergencyNumbers []string `json:"emergency-numbers"`
+	ICCID            string   `json:"iccid"`
+	IMSI             string   `json:"imsi"`
+	OperatorCode     string   `json:"operator-code"`
+	OperatorName     string   `json:"operator-name"`
+}
+
 // ListModems returns a list of all available modems with their IDs
 func ListModems() ([]string, error) {
 	out, err := exec.Command("mmcli", "-J", "-L").Output()
@@ -163,6 +178,20 @@ func ResetModem(modemID string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func GetSIMInfo(modemID string) (*SIMInfo, error) {
+	out, err := exec.Command("mmcli", "-i", modemID, "-J").Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get SIM info: %w", err)
+	}
+
+	var simInfo SIMInfo
+	if err := json.Unmarshal(out, &simInfo); err != nil {
+		return nil, fmt.Errorf("failed to parse SIM info: %w", err)
+	}
+
+	return &simInfo, nil
 }
 
 // Parse parses mmcli JSON output into a ModemManager struct
