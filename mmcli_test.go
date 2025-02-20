@@ -8,14 +8,11 @@ import (
 
 func TestParseModemList(t *testing.T) {
 	jsonData := []byte(`{
-		"modem-manager": {
-			"version": "1.18.4",
-			"modems": [
-				"/org/freedesktop/ModemManager1/Modem/0",
-				"/org/freedesktop/ModemManager1/Modem/1",
-				"/org/freedesktop/ModemManager1/Modem/2"
-			]
-		}
+		"modem-list": [
+			"/org/freedesktop/ModemManager1/Modem/0",
+			"/org/freedesktop/ModemManager1/Modem/1",
+			"/org/freedesktop/ModemManager1/Modem/2"
+		]
 	}`)
 
 	var list ModemList
@@ -24,12 +21,8 @@ func TestParseModemList(t *testing.T) {
 		t.Fatalf("Failed to parse modem list JSON: %v", err)
 	}
 
-	if len(list.ModemManager.Modems) != 3 {
-		t.Errorf("Expected 3 modems, got %d", len(list.ModemManager.Modems))
-	}
-
-	if list.ModemManager.Version != "1.18.4" {
-		t.Errorf("Expected version 1.18.4, got %s", list.ModemManager.Version)
+	if len(list.ModemList) != 3 {
+		t.Errorf("Expected 3 modems, got %d", len(list.ModemList))
 	}
 
 	expectedPaths := []string{
@@ -38,7 +31,7 @@ func TestParseModemList(t *testing.T) {
 		"/org/freedesktop/ModemManager1/Modem/2",
 	}
 
-	for i, path := range list.ModemManager.Modems {
+	for i, path := range list.ModemList {
 		if path != expectedPaths[i] {
 			t.Errorf("Expected path %s, got %s", expectedPaths[i], path)
 		}
