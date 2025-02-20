@@ -7,20 +7,14 @@ import (
 	"strings"
 )
 
-// ModemList represents the top-level structure for mmcli -L output
 type ModemList struct {
-	ModemManager struct {
-		Version string   `json:"version"`
-		Modems  []string `json:"modems"`
-	} `json:"modem-manager"`
+	ModemList []string `json:"modem-list"`
 }
 
-// ModemManager represents the top-level structure of mmcli JSON output
 type ModemManager struct {
 	Modem Modem `json:"modem"`
 }
 
-// Modem contains all modem-related information
 type Modem struct {
 	ThreeGPP ThreeGPP         `json:"3gpp"`
 	CDMA     CDMA             `json:"cdma"`
@@ -28,7 +22,6 @@ type Modem struct {
 	Generic  ModemGenericInfo `json:"generic"`
 }
 
-// ThreeGPP contains 3GPP-specific modem information
 type ThreeGPP struct {
 	EnabledLocks      []string `json:"enabled-locks"`
 	EPS               EPSInfo  `json:"eps"`
@@ -51,7 +44,6 @@ type EPSBearer struct {
 	Settings BearerSettings `json:"settings"`
 }
 
-// BearerSettings contains network connection settings
 type BearerSettings struct {
 	APN      string `json:"apn"`
 	IPType   string `json:"ip-type"`
@@ -59,7 +51,6 @@ type BearerSettings struct {
 	User     string `json:"user"`
 }
 
-// CDMA contains CDMA-specific modem information
 type CDMA struct {
 	ActivationState         string `json:"activation-state"`
 	CDMA1xRegistrationState string `json:"cdma1x-registration-state"`
@@ -70,7 +61,6 @@ type CDMA struct {
 	SID                     string `json:"sid"`
 }
 
-// ModemGenericInfo contains general modem information
 type ModemGenericInfo struct {
 	AccessTechnologies    []string      `json:"access-technologies"`
 	Bearers               []string      `json:"bearers"`
@@ -103,7 +93,6 @@ type ModemGenericInfo struct {
 	UnlockRetries         []string      `json:"unlock-retries"`
 }
 
-// SignalQuality contains signal strength information
 type SignalQuality struct {
 	Recent string `json:"recent"`
 	Value  string `json:"value"`
@@ -121,7 +110,7 @@ func ListModems() ([]string, error) {
 		return nil, fmt.Errorf("failed to parse modem list: %w", err)
 	}
 
-	return list.ModemManager.Modems, nil
+	return list.ModemList, nil
 }
 
 // GetModemIDs returns a list of numeric modem IDs
@@ -165,6 +154,15 @@ func GetModemDetails(modemID string) (*ModemManager, error) {
 	}
 
 	return Parse(out)
+}
+
+func ResetModem(modemID string) (bool, error) {
+	_, err := exec.Command("mmcli", "-m", modemID, "--reset").Output()
+	if err != nil {
+		return false, fmt.Errorf("failed to reset modem: %w", err)
+	}
+
+	return true, nil
 }
 
 // Parse parses mmcli JSON output into a ModemManager struct
