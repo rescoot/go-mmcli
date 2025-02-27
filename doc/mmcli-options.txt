@@ -1,0 +1,189 @@
+Usage:
+  mmcli [OPTION?] - Control and monitor the ModemManager
+
+Help Options:
+  -h, --help                                                     Show help options
+  --help-all                                                     Show all help options
+  --help-manager                                                 Show manager options
+  --help-common                                                  Show common options
+  --help-modem                                                   Show modem options
+  --help-3gpp                                                    Show 3GPP related options
+  --help-3gpp-profile-manager                                    Show 3GPP profile management related options
+  --help-3gpp-ussd                                               Show 3GPP USSD related options
+  --help-cdma                                                    Show CDMA related options
+  --help-simple                                                  Show Simple options
+  --help-location                                                Show Location options
+  --help-messaging                                               Show Messaging options
+  --help-voice                                                   Show Voice options
+  --help-time                                                    Show Time options
+  --help-firmware                                                Show Firmware options
+  --help-signal                                                  Show Signal options
+  --help-oma                                                     Show OMA options
+  --help-sim                                                     Show SIM options
+  --help-bearer                                                  Show bearer options
+  --help-sms                                                     Show SMS options
+  --help-call                                                    Show call options
+
+Manager options:
+  -B, --get-daemon-version                                       Get ModemManager daemon version
+  -G, --set-logging=[ERR,WARN,INFO,DEBUG]                        Set logging level in the ModemManager daemon
+  -L, --list-modems                                              List available modems
+  -M, --monitor-modems                                           List available modems and monitor additions and removals
+  -S, --scan-modems                                              Request to re-scan looking for modems
+  -I, --inhibit-device=[UID]                                     Inhibit device given a unique device identifier
+  --report-kernel-event=["key=value,..."]                        Report kernel event
+  --report-kernel-event-auto-scan                                Automatically report kernel events based on udev notifications
+
+Common options
+  -m, --modem=[PATH|INDEX|UID|any]                               Specify modem by path, index, UID or 'any'. Shows modem information if no action specified.
+  -b, --bearer=[PATH|INDEX]                                      Specify bearer by path or index. Shows bearer information if no action specified.
+  -i, --sim=[PATH|INDEX|UID|any]                                 Specify SIM card by path, index, UID or 'any'. Shows SIM card information if no action specified.
+  -s, --sms=[PATH|INDEX]                                         Specify SMS by path or index. Shows SMS information if no action specified.
+  -o, --call=[PATH|INDEX]                                        Specify Call by path or index. Shows Call information if no action specified.
+
+Modem options:
+  -w, --monitor-state                                            Monitor state of a given modem
+  -e, --enable                                                   Enable a given modem
+  -d, --disable                                                  Disable a given modem
+  --set-power-state-on                                           Set full power state in the modem
+  --set-power-state-low                                          Set low power state in the modem
+  --set-power-state-off                                          Power off the modem
+  -r, --reset                                                    Reset a given modem
+  --factory-reset=[CODE]                                         Reset a given modem to its factory state
+  --command=[COMMAND]                                            Send an AT command to the modem
+  --create-bearer=["key=value,..."]                              Create a new packet data bearer in a given modem
+  --delete-bearer=[PATH|INDEX]                                   Delete a data bearer from a given modem
+  --set-current-capabilities=[CAPABILITY1|CAPABILITY2...]        Set current modem capabilities.
+  --set-allowed-modes=[MODE1|MODE2...]                           Set allowed modes in a given modem.
+  --set-preferred-mode=[MODE]                                    Set preferred mode in a given modem (Must give allowed modes with --set-allowed-modes)
+  --set-current-bands=[BAND1|BAND2...]                           Set bands to be used by a given modem.
+  --set-primary-sim-slot=[SLOT NUMBER]                           Switch to the selected SIM slot
+  --inhibit                                                      Inhibit the modem
+
+3GPP options:
+  --3gpp-scan                                                    Scan for available networks in a given modem.
+  --3gpp-register-home                                           Request a given modem to register in its home network
+  --3gpp-register-in-operator=[MCCMNC]                           Request a given modem to register in the network of the given operator
+  --3gpp-set-eps-ue-mode-operation=[ps-1|ps-2|csps-1|csps-2]     Set the UE mode of operation for EPS
+  --3gpp-set-initial-eps-bearer-settings=["key=value,..."]       Set the initial EPS bearer settings
+  --3gpp-disable-facility-lock=[facility,key]                    Disable facility personalization
+
+3GPP profile management options:
+  --3gpp-profile-manager-list                                    List available profiles
+  --3gpp-profile-manager-set=["key=value,..."]                   Create or update a profile with the given settings.
+  --3gpp-profile-manager-delete=[Profile ID]                     Delete the profile with the given ID
+
+3GPP USSD options:
+  --3gpp-ussd-status                                             Show status of any ongoing USSD session
+  --3gpp-ussd-initiate=[command]                                 Request a given modem to initiate a USSD session
+  --3gpp-ussd-respond=[response]                                 Request a given modem to respond to a USSD request
+  --3gpp-ussd-cancel                                             Request to cancel any ongoing USSD session
+
+CDMA options:
+  --cdma-activate=[CARRIER]                                      Provision the modem to use with a given carrier using OTA settings.
+  --cdma-activate-manual=["key=value,..."]                       Provision the modem with the given settings. 'spc', 'sid', 'mdn' and 'min' are mandatory, 'mn-ha-key' and 'mn-aaa-key' are optional.
+  --cdma-activate-manual-with-prl=[File path]                    Use the given file contents as data for the PRL.
+
+Simple options:
+  --simple-connect=["key=value,..."]                             Run full connection sequence.
+  --simple-disconnect                                            Disconnect all connected bearers.
+
+Location options:
+  --location-status                                              Show status of location gathering.
+  --location-get                                                 Get all available location information.
+  --location-monitor                                             Monitor all available location information.
+  --location-enable-3gpp                                         Enable 3GPP location gathering.
+  --location-disable-3gpp                                        Disable 3GPP location gathering.
+  --location-enable-agps-msa                                     Enable MSA A-GPS location gathering.
+  --location-disable-agps-msa                                    Disable MSA A-GPS location gathering.
+  --location-enable-agps-msb                                     Enable MSB A-GPS location gathering.
+  --location-disable-agps-msb                                    Disable MSB A-GPS location gathering.
+  --location-enable-gps-nmea                                     Enable NMEA-based GPS location gathering.
+  --location-disable-gps-nmea                                    Disable NMEA-based GPS location gathering.
+  --location-enable-gps-raw                                      Enable raw GPS location gathering.
+  --location-disable-gps-raw                                     Disable raw GPS location gathering.
+  --location-enable-cdma-bs                                      Enable CDMA base station location gathering.
+  --location-disable-cdma-bs                                     Disable CDMA base station location gathering.
+  --location-enable-gps-unmanaged                                Enable unmanaged GPS location gathering.
+  --location-disable-gps-unmanaged                               Disable unmanaged GPS location gathering.
+  --location-set-supl-server=[IP:PORT] or [FQDN:PORT]            Set SUPL server address
+  --location-inject-assistance-data=[PATH]                       Inject assistance data in the GNSS module
+  --location-set-gps-refresh-rate=[RATE]                         Set GPS refresh rate in seconds, or 0 disable the explicit rate.
+  --location-set-enable-signal                                   Enable location update signaling in DBus property.
+  --location-set-disable-signal                                  Disable location update signaling in DBus property.
+
+Messaging options:
+  --messaging-status                                             Show status of messaging support.
+  --messaging-list-sms                                           List SMS messages available in a given modem
+  --messaging-create-sms=["key=value,..."]                       Create a new SMS in a given modem
+  --messaging-create-sms-with-data=[File path]                   Pass the given file as data contents when creating a new SMS
+  --messaging-delete-sms=[PATH|INDEX]                            Delete a SMS from a given modem
+
+Voice options:
+  --voice-status                                                 Show status of voice support.
+  --voice-list-calls                                             List calls available in a given modem
+  --voice-create-call=["key=value,..."]                          Create a new call in a given modem
+  --voice-delete-call=[PATH|INDEX]                               Delete a call from a given modem
+  --voice-hold-and-accept                                        Places all active calls in hold and accepts the next waiting or held call
+  --voice-hangup-and-accept                                      Hangs up all active calls and accepts the next waiting or held call
+  --voice-hangup-all                                             Hangs up all ongoing (active, waiting, held) calls
+  --voice-transfer                                               Joins active and held calls and disconnects from them
+  --voice-enable-call-waiting                                    Enables the call waiting network service
+  --voice-disable-call-waiting                                   Disables the call waiting network service
+  --voice-query-call-waiting                                     Queries the status of the call waiting network service
+
+Time options:
+  --time                                                         Get current network time
+
+Firmware options:
+  --firmware-status                                              Show status of firmware management.
+  --firmware-list                                                List firmware images installed in a given modem
+  --firmware-select=[Unique ID]                                  Select a given firmware image
+
+Signal options:
+  --signal-setup=[Rate]                                          Setup extended signal information retrieval
+  --signal-get                                                   Get all extended signal quality information
+
+OMA options:
+  --oma-status                                                   Current status of the OMA device management
+  --oma-setup=[FEATURE1|FEATURE2...]                             Setup OMA features
+  --oma-start-client-initiated-session=[Session type]            Start client initiated OMA DM session
+  --oma-accept-network-initiated-session=[Session ID]            Accept network initiated OMA DM session
+  --oma-reject-network-initiated-session=[Session ID]            Reject network initiated OMA DM session
+  --oma-cancel-session                                           Cancel current OMA DM session
+
+SIM options:
+  --pin=[PIN]                                                    Send PIN code to a given SIM.
+  --puk=[PUK]                                                    Send PUK code to a given SIM (must send the new PIN with --pin).
+  --enable-pin                                                   Enable PIN request in a given SIM (must send the current PIN with --pin).
+  --disable-pin                                                  Disable PIN request in a given SIM (must send the current PIN with --pin).
+  --change-pin=[New PIN]                                         Change the PIN in a given SIM (must send the current PIN with --pin).
+  --sim-set-preferred-networks=[[MCCMNC[,access_tech]],...]      Set preferred network list stored in a given SIM.
+
+Bearer options:
+  -c, --connect                                                  Connect a given bearer.
+  -x, --disconnect                                               Disconnect a given bearer.
+
+SMS options:
+  --send                                                         Send SMS.
+  --store                                                        Store the SMS in the device, at the default storage
+  --store-in-storage=[Storage]                                   Store the SMS in the device, at the specified storage
+  --create-file-with-data=[File path]                            Create a file with the data contents of the SMS.
+
+Call options:
+  --start                                                        Start the call.
+  --accept                                                       Accept the incoming call
+  --deflect=[NUMBER]                                             Deflect the incoming call
+  --join-multiparty                                              Join multiparty call
+  --leave-multiparty                                             Leave multiparty call
+  --hangup                                                       Hang up the call
+  --send-dtmf=[0-9A-D*#]                                         Send specified DTMF tone
+
+Application Options:
+  -K, --output-keyvalue                                          Run action with machine-friendly key-value output
+  -J, --output-json                                              Run action with machine-friendly json output
+  -v, --verbose                                                  Run action with verbose logs
+  -V, --version                                                  Print version
+  -a, --async                                                    Use asynchronous methods
+  --timeout=[SECONDS]                                            Timeout for the operation
+
