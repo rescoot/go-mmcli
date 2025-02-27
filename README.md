@@ -1,6 +1,6 @@
 # go-mmcli
 
-A Go library for parsing and working with ModemManager CLI (mmcli) JSON output. This library provides a simple interface to work with modem information, connection status, signal strength, location data, network time, and other modem-related functionality.
+A Go library for parsing and working with ModemManager CLI (mmcli) JSON output. This library provides a simple interface to work with modem information, connection status, signal strength, location data, network time, SMS messaging, and other modem-related functionality.
 
 ## Installation
 
@@ -23,6 +23,7 @@ go get github.com/rescoot/go-mmcli
 - Get and manage location information
 - Establish and manage network connections
 - Retrieve network time information
+- Send and receive SMS messages
 
 ## Finding Modems
 
@@ -123,6 +124,17 @@ func main() {
 ### Time Functions
 - `GetNetworkTime(modemID string) (*TimeInfo, error)` - Get current network time information
 - `GetNetworkTimeAsTime(modemID string) (time.Time, error)` - Get network time as a time.Time object
+
+### SMS Functions
+- `GetMessagingStatus(modemID string) (*MessagingStatus, error)` - Get messaging support status
+- `ListSMS(modemID string) ([]string, error)` - List available SMS messages
+- `GetSMSInfo(smsID string) (*SMSInfo, error)` - Get information about a specific SMS
+- `CreateSMS(modemID string, settings SMSCreateSettings) (string, error)` - Create a new SMS
+- `SendSMS(smsID string) error` - Send an SMS
+- `StoreSMS(smsID string) error` - Store an SMS in the default storage
+- `StoreSMSInStorage(smsID string, storage string) error` - Store an SMS in a specific storage
+- `DeleteSMS(modemID string, smsID string) error` - Delete an SMS
+- `CreateAndSendSMS(modemID string, number string, text string) error` - Create and send an SMS in one step
 
 ## Examples
 
@@ -267,6 +279,52 @@ func main() {
         }
         fmt.Println("Disconnected successfully!")
     }
+}
+```
+
+### SMS Example
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    
+    "github.com/rescoot/go-mmcli"
+)
+
+func main() {
+    // Get first available modem ID
+    id, err := mmcli.GetFirstModemID()
+    if err != nil {
+        log.Fatal("No modem found:", err)
+    }
+    
+    // Get messaging status
+    status, err := mmcli.GetMessagingStatus(id)
+    if err != nil {
+        log.Fatal("Failed to get messaging status:", err)
+    }
+    fmt.Printf("Supported storages: %v\n", status.SupportedStorages)
+    
+    // List SMS messages
+    messages, err := mmcli.ListSMS(id)
+    if err != nil {
+        log.Fatal("Failed to list SMS messages:", err)
+    }
+    fmt.Printf("Found %d SMS messages\n", len(messages))
+    
+    // Send an SMS
+    number := "+1234567890"  // Replace with actual number
+    text := "Hello from go-mmcli!"
+    
+    fmt.Printf("Sending SMS to %s: %s\n", number, text)
+    err = mmcli.CreateAndSendSMS(id, number, text)
+    if err != nil {
+        log.Fatal("Failed to send SMS:", err)
+    }
+    fmt.Println("SMS sent successfully!")
 }
 ```
 
